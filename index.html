@@ -1,77 +1,94 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My Black and Green Website</title>
-    <style>
-        body {
-            background-color: black;
-            color: green;
-            font-family: 'Courier New', monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            padding: 0;
-        }
-
-        h1 {
-            font-size: 28px;
-            margin-bottom: 20px;
-        }
-
-        form {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-
-        label, input, button {
-            margin-bottom: 10px;
-        }
-
-        input[type="text"] {
-            width: 300px;
-            padding: 5px;
-        }
-
-        button {
-            padding: 5px 10px;
-            background-color: green;
-            color: black;
-            border: none;
-            cursor: pointer;
-        }
-
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        li {
-            margin-bottom: 10px;
-        }
-    </style>
+	<title>Sticky Notes</title>
+	<style>
+		body {
+			background-color: black;
+			color: green;
+		}
+		.sticky-note {
+			position: absolute;
+			background-color: yellow;
+			padding: 10px;
+			border-radius: 10px;
+			box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+		}
+		.sticky-note-heading {
+			font-size: 20px;
+			font-weight: bold;
+			margin-bottom: 10px;
+		}
+		.edit-icon {
+			float: right;
+			margin-left: 10px;
+			cursor: pointer;
+		}
+	</style>
 </head>
 <body>
-    <h1>ஆதி பகவன் முதற்றே உலகு</h1>
-    <form id="myForm">
-        <label for="textInput">சொல்லுங்கள்:/label>
-        <input type="text" id="textInput" name="textInput">
-        <button type="button" onclick="addItem()">Submit</button>
-    </form>
-    <ul id="myList"></ul>
-    <script>
-        function addItem() {
-            var input = document.getElementById("textInput").value;
-            var newItem = document.createElement("li");
-            var textNode = document.createTextNode(input);
-            newItem.appendChild(textNode);
-            document.getElementById("myList").appendChild(newItem);
-            document.getElementById("myForm").reset();
-        }
-    </script>
+	<div id="container">
+		<button id="add-btn">+</button>
+	</div>
+	<script>
+		const container = document.getElementById('container');
+		const addBtn = document.getElementById('add-btn');
+		let zIndex = 1;
+
+		addBtn.addEventListener('click', addNote);
+
+		function addNote() {
+			const note = createNote();
+			container.appendChild(note);
+		}
+
+		function createNote() {
+			const note = document.createElement('div');
+			note.classList.add('sticky-note');
+			note.style.left = Math.floor(Math.random() * (window.innerWidth - 200)) + 'px';
+			note.style.top = Math.floor(Math.random() * (window.innerHeight - 200)) + 'px';
+			note.style.zIndex = zIndex++;
+			note.draggable = true;
+
+			const heading = document.createElement('div');
+			heading.classList.add('sticky-note-heading');
+			heading.textContent = 'Sticky Note';
+
+			const editIcon = document.createElement('span');
+			editIcon.classList.add('edit-icon');
+			editIcon.innerHTML = '&#9998;';
+			editIcon.addEventListener('click', () => {
+				const newHeading = prompt('Enter a new heading:');
+				if (newHeading) {
+					heading.textContent = newHeading;
+				}
+			});
+
+			const body = document.createElement('div');
+			body.textContent = 'Body text goes here...';
+
+			note.appendChild(editIcon);
+			note.appendChild(heading);
+			note.appendChild(body);
+
+			note.addEventListener('mousedown', () => {
+				note.style.zIndex = zIndex++;
+			});
+
+			note.addEventListener('dragstart', (event) => {
+				event.dataTransfer.setData('text/plain', null);
+				const offset = event.clientX - note.offsetLeft;
+				event.dataTransfer.setData('text/plain', offset);
+			});
+
+			note.addEventListener('drag', (event) => {
+				const offset = event.dataTransfer.getData('text/plain');
+				note.style.left = (event.clientX - offset) + 'px';
+				note.style.top = event.clientY + 'px';
+			});
+
+			return note;
+		}
+	</script>
 </body>
 </html>
